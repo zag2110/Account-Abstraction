@@ -1,0 +1,36 @@
+{
+  "name": "erc4337-smart-account",
+  "version": "1.0.0",
+  "description": "ERC-4337 Smart Account with multisig, batching, session keys, and social recovery",
+  "type": "module",
+  "scripts": {
+    "deploy": "forge script contracts/script/Deploy.s.sol:Deploy --rpc-url sepolia --broadcast --verify -vvvv",
+    "create-account": "tsx scripts/createAccount.ts",
+    "mint-nft": "tsx scripts/mintNFT.ts",
+    "test-session-key": "tsx scripts/testSessionKey.ts",
+    "test-batch": "tsx scripts/testBatch.ts",
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "preview": "cd frontend && npm run preview"
+  },
+  "keywords": [
+    "erc-4337",
+    "account-abstraction",
+    "smart-account",
+    "ethereum",
+    "foundry",
+    "pimlico"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "viem": "^2.21.54",
+    "permissionless": "^0.2.18",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
