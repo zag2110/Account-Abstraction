@@ -445,30 +445,9 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- OpenZeppelin for secure contract libraries
-- Eth-Infinitism for ERC-4337 reference implementation
-- Pimlico for bundler infrastructure
-- Alchemy for RPC services
-- ESILV for the project opportunity
-
----
 
 ## 📧 Contact
 
 Aline - [@alineuh](https://github.com/alineuh)
-
 Project Link: [https://github.com/alineuh/erc4337-smart-account-v07-sepolia](https://github.com/alineuh/erc4337-smart-account-v07-sepolia)
-
----
-
-**Built with ❤️ using ERC-4337 Account Abstraction**
+Linkedin : https://www.linkedin.com/in/aline-spano-a1493025b/
