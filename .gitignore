@@ -2,6 +2,7 @@
 contracts/out/
 contracts/cache/
 contracts/broadcast/
+contracts/lib/
 
 # Node
 node_modules/
@@ -18,3 +19,16 @@ yarn-error.log*
 # OS / IDE
 .DS_Store
 .vscode/
+# Foundry
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+contracts/lib/
+
+# Env / secrets
+.env
+contracts/.env
+
+# Node
+node_modules/
+dist/
