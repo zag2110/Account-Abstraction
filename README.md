@@ -1,19 +1,22 @@
-# ERC-4337 Smart Account
+# Account Abstraction ERC-4337
+TD Cours Monnaies Numériques 2026  
+Par Sacha (zag2110)
 
-Implémentation d'Account Abstraction (ERC-4337 v0.7) sur Sepolia avec multisig, batch transactions, session keys et social recovery.
+## Description
 
-Stack: Solidity 0.8.24, Foundry, TypeScript, React, Viem, Pimlico
+Implémentation d'Account Abstraction (ERC-4337 v0.7) déployée sur Sepolia. C'est un Smart Account qui permet d'utiliser des signatures multiples, de batching de transactions, des session keys temporaires et du social recovery.
 
-## Ce que ça fait
+Le principe : au lieu d'avoir juste un wallet EOA classique, on a un smart contract qui gère le compte. Ça permet de faire des trucs impossibles avec un wallet normal (payer le gas avec des tokens, batching, délégation de droits, etc).
 
-Le projet implémente un Smart Account ERC-4337 qui permet:
-- Signatures multiples avec seuil configurable
-- Batching de transactions (économie de ~45% de gas)
-- Session keys temporaires pour déléguer des permissions
-- Récupération sociale via guardians
-- Paymaster pour sponsoriser les frais de gas
+Stack : Solidity 0.8.24, Foundry, TypeScript, React, Viem, Pimlico
 
-Frontend React avec RainbowKit pour connecter son wallet et interagir avec le compte.  
+## Fonctionnalités
+
+- **Multisig** : Plusieurs owners avec seuil configurable
+- **Batch transactions** : Grouper plusieurs opérations en une seule (économie de ~45% de gas)
+- **Session keys** : Déléguer des permissions temporaires à d'autres clés
+- **Social recovery** : Récupérer le compte via des guardians
+- **Paymaster** : Quelqu'un d'autre peut payer le gas à votre place
 
 ## Architecture
 
@@ -24,7 +27,7 @@ EOA Wallet (MetaMask)
     v
 Smart Account
   - Multisig
-  - Batching
+  - Batching  
   - Session Keys
   - Recovery
     |
@@ -35,15 +38,15 @@ EntryPoint (v0.7)
 Bundler (Pimlico) --> Paymaster (sponsor gas)
 ```
 
-Un UserOp fonctionne comme une transaction normale, mais passe par l'EntryPoint qui valide puis exécute. Le Paymaster peut payer les frais à la place de l'utilisateur.
+Le flow : au lieu d'envoyer une transaction classique, on crée une UserOperation qu'on signe avec notre wallet. Le Bundler (Pimlico) prend le UserOp, le valide, et l'exécute via l'EntryPoint. Le Paymaster peut sponsoriser les frais.
 
 ## Installation
 
-Prérequis:
+Prérequis :
 - Node.js 18+
 - Foundry
 - Un peu de Sepolia ETH
-- Une clé API Pimlico (gratuit sur leur site)
+- Clé API Pimlico (gratuit sur leur site)
 
 ```bash
 git clone https://github.com/zag2110/Account-Abstraction.git
@@ -52,106 +55,105 @@ npm install
 cd contracts && forge install && cd ..
 ```
 
-Configuration:
+Config :
 ```bash
 cp .env.example .env
 # Éditer .env avec vos clés
 ```
 
-Le `.env` doit contenir:
+Le `.env` doit contenir :
 - `PRIVATE_KEY` - Votre clé privée (avec 0x)
 - `PIMLICO_API_KEY` - Clé API Pimlico
-- Les adresses de contrats (après déploiement)
-
-## Smart Contracts
-
-Contrats principaux:
-- `SmartAccount.sol` - Compte avec multisig, batching, session keys
-- `SmartAccountFactory.sol` - Déploiement avec CREATE2
-- `DemoPaymaster.sol` - Sponsorisation gas (demo)
-- `DemoNFT.sol` - NFT de test ERC-721
-
-
-#### SmartAccount
-
-Les fonctions principales:
-
-```solidity
-execute(address target, uint256 value, bytes calldata data)
-executeBatch(address[] targets, uint256[] values, bytes[] datas)
-addSessionKey(address key, uint48 validUntil, bool oneTime)
-proposeRecovery(address[] newOwners, uint256 newThreshold)
-```
+- Les adresses de contrats déployés
 
 ## Utilisation
 
-### Créer votre Smart Account
+### Créer un Smart Account
 
-Frontend:
+Frontend :
 ```bash
 npm run dev
-# http://localhost:5173, connecter wallet, cliquer "Create Account"
+# http://localhost:5173, connecter wallet, "Create Account"
 ```
 
-CLI:
+CLI :
 ```bash
 npm run create-account
 ```
 
-### Minter un NFT
+### Minter un NFT (via UserOp)
 
 ```bash
 npm run mint-nft
 ```
 
-### Batch transactions (économise ~45% de gas)
+### Batch de 3 NFTs (économise du gas)
 
 ```bash
-npm run test-batch  # mint 3 NFTs d'un coup
+npm run test-batch
 ```
 
-### Session keys
+### Tester les session keys
 
 ```bash
 npm run test-session-key
 ```
 
-## Adresses des contrats (Sepolia)
+## Contrats déployés (Sepolia)
 
-Tous déployés et vérifiés:
+| Contrat | Adresse |
+|---------|---------|
+| EntryPoint | `0x0000000071727De22E5E9d8BAf0edAc6f37da032` |
+| Implementation | `0x50F0Af68179FE6771b5Ef31A232C17e59543a273` |
+| Factory | `0x34b271bE0ce80156DBa7562298A1276c6Fe15C58` |
+| Paymaster | `0xf66fffBBd79Bc2014db0a44D66844b1050a8a1a3` |
+| NFT | `0xEC7926eBc6E3f2C0BF669111E50DcB11466BcD19` |
+| Smart Account | `0xe61e60079C3d41241bd90D65a7417938B8eCA27b` |
 
-- **EntryPoint**: `0x0000000071727De22E5E9d8BAf0edAc6f37da032`
-- **Implementation**: `0x50F0Af68179FE6771b5Ef31A232C17e59543a273`
-- **Factory**: `0x34b271bE0ce80156DBa7562298A1276c6Fe15C58`
-- **Paymaster**: `0xf66fffBBd79Bc2014db0a44D66844b1050a8a1a3` (0.05 ETH dedans)
-- **NFT**: `0xEC7926eBc6E3f2C0BF669111E50DcB11466BcD19`
-- **Smart Account**: `0xe61e60079C3d41241bd90D65a7417938B8eCA27b`
+Le Paymaster a 0.05 ETH pour sponsoriser les transactions.
 
-## Détails techniques
+## Résultats
+
+**Gas économisé avec batching :**
+- Single mint : ~160k gas
+- Batch 3 mints : ~248k gas
+- **Économie : 45%**
+
+**Transactions notables :**
+- Premier mint : [0x86e8eab3...](https://sepolia.etherscan.io/tx/0x86e8eab36d6b2803aa096ee585f57478fd73bc9dfd42cd6062b9ea603b8638a7)
+- Batch 3 NFTs : [0xef5b3b88...](https://sepolia.etherscan.io/tx/0xef5b3b8807edef25c02e6e4d0b034073dc5e08f1170d8b25b489a492b9b0d615)
+- Session key mint : [0x8306dbc8...](https://sepolia.etherscan.io/tx/0x8306dbc8288293ba5268aba5a334394c6db2af5099ede96163a748d45272b872)
+
+## Notes techniques
 
 ### UserOperation v0.7
 
-La v0.7 utilise un format "packed" on-chain mais Pimlico veut "unpacked". Le code gère ça:
+La v0.7 de ERC-4337 utilise un format "packed" on-chain (les gas limits sont combinés en bytes32) mais l'API Pimlico veut du unpacked.
 
+Le code gère ça automatiquement :
 1. Pack les gas limits pour calculer le hash
-2. Signe avec `signMessage()` (pas `sign()` !)
-3. Unpack pour envoyer à Pimlico
+2. Signe avec `signMessage()` (pas `sign()` !) parce que le contrat utilise `_ethSigned()`
+3. Unpack avant d'envoyer à Pimlico
 
 ### Session Keys
 
-Les session keys permettent de déléguer des droits temporairement. Important: il faut les ajouter avec une transaction normale (pas UserOp) à cause du `onlyOwner`.
+Les session keys c'est pour déléguer temporairement des droits. Important : faut les ajouter avec une transaction normale (pas un UserOp) à cause du modifier `onlyOwner` qui check `msg.sender`.
 
-### Gas
+Si on passe par un UserOp, `msg.sender` serait l'EntryPoint, pas l'owner.
 
-- Single NFT: ~160k gas
-- Batch 3 NFTs: ~248k gas
-- Économie: 45%
+### Smart Contracts
+
+Contrats principaux :
+- `SmartAccount.sol` - Le compte avec toutes les features
+- `SmartAccountFactory.sol` - Déploiement avec CREATE2
+- `DemoPaymaster.sol` - Pour sponsoriser le gas
+- `DemoNFT.sol` - NFT de test ERC-721
 
 ## Problèmes connus
 
-- Le frontend mint ne marche pas super bien, utiliser le CLI
-- Les session keys doivent être ajoutées par le owner directement
-- Pimlico est parfois lent
+- Le frontend mint marche pas super, utiliser le CLI
+- Pimlico est parfois lent pendant les heures de pointe
+- Les session keys doivent être ajoutées directement par l'owner
 
 ## Tests
 
@@ -160,85 +162,17 @@ cd contracts
 forge test -vvv
 ```
 
+## Notes
+
+Projet éducatif pour le cours Monnaies Numériques - Account Abstraction
+
+Le Paymaster est en mode "approve all" pour la demo. ⚠️ NE PAS UTILISER EN PROD ⚠️
+
 ## License
 
 MIT
 
-#### 3. "Insufficient funds for gas"
+## Crédits
 
-**Problème**: Pas assez de Sepolia ETH
-
-**Solution**: Obtenir plus d'ETH depuis les faucets:
-- [Google Cloud Faucet](https://cloud.google.com/application/web3/faucet/ethereum/sepolia)
-- [Alchemy Faucet](https://www.alchemy.com/faucets/ethereum-sepolia)
-
-#### 4. "AA24 signature error"
-
-**Problème**: Signature invalide ou format incorrect
-
-**Solution**: 
-- Utiliser `signMessage()` au lieu de `sign()` pour compatibilité avec `_ethSigned()`
-- Vérifier que le format UserOp est correct (packed pour hash, unpacked pour API)
-
----
-
-## 📚 Ressources
-
-### Documentation Officielle
-
-- [Spécification ERC-4337](https://eips.ethereum.org/EIPS/eip-4337)
-- [EntryPoint v0.7](https://github.com/eth-infinitism/account-abstraction/releases/tag/v0.7.0)
-- [Documentation Pimlico](https://docs.pimlico.io/)
-- [Foundry Book](https://book.getfoundry.sh/)
-
-### Ressources d'Apprentissage
-
-- [Guide Account Abstraction](https://www.alchemy.com/overviews/account-abstraction)
-- [ERC-4337 Deep Dive](https://www.erc4337.io/)
-- [Documentation Viem](https://viem.sh/)
-
-### Communauté
-
-- [Discord Account Abstraction](https://discord.gg/account-abstraction)
-- [Telegram Foundry](https://t.me/foundry_rs)
-
----
-
-## 🤝 Contribution
-
-Les contributions sont les bienvenues! N'hésitez pas à soumettre une Pull Request.
-
-1. Fork le repository
-2. Créez votre branche feature (`git checkout -b feature/AmazingFeature`)
-3. Commit vos changements (`git commit -m 'Add some AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrez une Pull Request
-
----
-
-## 📧 Contact
-
-**Sacha** - GitHub: [@zag2110](https://github.com/zag2110)
-
-**Project Link**: [https://github.com/zag2110/Account-Abstraction](https://github.com/zag2110/Account-Abstraction)
-
----
-
-## 📄 Licence
-
-Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
-
----
-
-## 🙏 Remerciements
-
-- [Ethereum Foundation](https://ethereum.org/) pour ERC-4337
-- [Pimlico](https://pimlico.io/) pour le service bundler
-- [Foundry](https://getfoundry.sh/) pour les outils de développement
-- [OpenZeppelin](https://openzeppelin.com/) pour les bibliothèques sécurisées
-
----
-
-<div align="center">
-  <strong>⭐ Si ce projet vous a aidé, n'hésitez pas à lui donner une étoile! ⭐</strong>
-</div>
+Basé sur ERC-4337 par Ethereum Foundation  
+Adapté par Sacha pour usage personnel et éducatif
