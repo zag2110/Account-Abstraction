@@ -93,22 +93,39 @@ async function main() {
 
   log('🔢 Current Nonce', nonce.toString());
 
-  // 4) Créer le UserOp
+  // 4) Créer le UserOp (format packed pour le calcul de hash)
+  const verificationGasLimit = 300000n;
+  const callGasLimit = 300000n;
+  const accountGasLimits = concat([
+    pad(toHex(verificationGasLimit), { size: 16 }),
+    pad(toHex(callGasLimit), { size: 16 }),
+  ]);
+
+  const maxPriorityFeePerGas = parseEther('0.000000002');
+  const maxFeePerGas = parseEther('0.00000002');
+  const gasFees = concat([
+    pad(toHex(maxPriorityFeePerGas), { size: 16 }),
+    pad(toHex(maxFeePerGas), { size: 16 }),
+  ]);
+
+  const paymasterVerificationGasLimit = 80000n;
+  const paymasterPostOpGasLimit = 80000n;
+  const paymasterAndData = concat([
+    PAYMASTER_ADDRESS,
+    pad(toHex(paymasterVerificationGasLimit), { size: 16 }),
+    pad(toHex(paymasterPostOpGasLimit), { size: 16 }),
+    '0x' as Hash,
+  ]);
+
   const userOp = {
     sender: smartAccountAddress,
-    nonce: nonce,
+    nonce,
     initCode: '0x' as Hash,
     callData: executeBatchCallData as Hash,
-    accountGasLimits: pad(toHex(300000n), { size: 32 }) as Hash, // Plus de gas pour le batch
-    preVerificationGas: 80000n, // Plus de gas pour les 3 ops
-    gasFees: concat([
-      pad(toHex(parseEther('0.000000002')), { size: 16 }),
-      pad(toHex(parseEther('0.00000002')), { size: 16 }),
-    ]) as Hash,
-    paymasterAndData: concat([
-      PAYMASTER_ADDRESS,
-      pad('0x', { size: 0 }),
-    ]) as Hash,
+    accountGasLimits,
+    preVerificationGas: 80000n,
+    gasFees,
+    paymasterAndData,
     signature: '0x' as Hash,
   };
 
@@ -118,44 +135,47 @@ async function main() {
     totalEstimatedGas: '~300k gas',
   });
 
-  // 5) Calculer le userOpHash
+  // 5) Calculer le userOpHash pour v0.7 (méthode correcte)
   const chainId = await publicClient.getChainId();
   
+  // Pack selon UserOperationLib.encode()
+  const packedData = encodeAbiParameters(
+    [
+      { type: 'address' },
+      { type: 'uint256' },
+      { type: 'bytes32' },
+      { type: 'bytes32' },
+      { type: 'bytes32' },
+      { type: 'uint256' },
+      { type: 'bytes32' },
+      { type: 'bytes32' },
+    ],
+    [
+      userOp.sender,
+      userOp.nonce,
+      keccak256(userOp.initCode),
+      keccak256(userOp.callData),
+      userOp.accountGasLimits,
+      userOp.preVerificationGas,
+      userOp.gasFees,
+      keccak256(userOp.paymasterAndData),
+    ]
+  );
+
+  // userOp.hash() = keccak256(encode(userOp))
+  const userOpHashInternal = keccak256(packedData);
+
+  // getUserOpHash() = keccak256(abi.encode(userOp.hash(), entryPoint, chainId))
   const userOpHash = keccak256(
     encodeAbiParameters(
-      [
-        { type: 'address' },
-        { type: 'uint256' },
-        { type: 'bytes32' },
-        { type: 'bytes32' },
-        { type: 'bytes32' },
-        { type: 'uint256' },
-        { type: 'bytes32' },
-        { type: 'bytes32' },
-      ],
-      [
-        userOp.sender,
-        userOp.nonce,
-        keccak256(userOp.initCode),
-        keccak256(userOp.callData),
-        userOp.accountGasLimits,
-        userOp.preVerificationGas,
-        userOp.gasFees,
-        keccak256(userOp.paymasterAndData),
-      ]
-    )
-  );
-
-  const finalHash = keccak256(
-    encodeAbiParameters(
       [{ type: 'bytes32' }, { type: 'address' }, { type: 'uint256' }],
-      [userOpHash, ENTRYPOINT_ADDRESS, BigInt(chainId)]
+      [userOpHashInternal, ENTRYPOINT_ADDRESS, BigInt(chainId)]
     )
   );
 
-  // 6) Signer
+  // 6) Signer le userOpHash avec signMessage (applique le préfixe Ethereum Signed Message)
   const signature = await owner.signMessage({
-    message: { raw: finalHash },
+    message: { raw: userOpHash },
   });
 
   const fullSignature = encodeAbiParameters(
@@ -173,13 +193,30 @@ async function main() {
 
   log('✍️  Batch UserOp Signed', 'Ready to send...');
 
-  // 7) Envoyer au bundler
+  // 7) Préparer le UserOp pour Pimlico (format unpacked)
+  const userOpForBundle = {
+    sender: userOp.sender,
+    nonce: toHex(userOp.nonce),
+    callData: userOp.callData,
+    callGasLimit: toHex(callGasLimit),
+    verificationGasLimit: toHex(verificationGasLimit),
+    preVerificationGas: toHex(userOp.preVerificationGas),
+    maxFeePerGas: toHex(maxFeePerGas),
+    maxPriorityFeePerGas: toHex(maxPriorityFeePerGas),
+    paymaster: PAYMASTER_ADDRESS,
+    paymasterData: '0x' as Hash,
+    paymasterVerificationGasLimit: toHex(paymasterVerificationGasLimit),
+    paymasterPostOpGasLimit: toHex(paymasterPostOpGasLimit),
+    signature: userOp.signature,
+  };
+
+  // 8) Envoyer au bundler
   log('📡 Sending Batch UserOp to Bundler', 'Please wait...');
 
   try {
     const userOpReceipt = await bundlerClient.request({
       method: 'eth_sendUserOperation' as any,
-      params: [userOp, ENTRYPOINT_ADDRESS],
+      params: [userOpForBundle, ENTRYPOINT_ADDRESS],
     });
 
     log('✅ Batch UserOp Sent!', {
@@ -187,7 +224,7 @@ async function main() {
       operations: batchSize,
     });
 
-    // 8) Attendre l'exécution
+    // 9) Attendre l'exécution
     log('⏳ Waiting for batch execution', 'This may take 5-15 seconds...');
 
     let receipt = null;

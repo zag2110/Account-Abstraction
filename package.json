@@ -21,7 +21,7 @@
     "foundry",
     "pimlico"
   ],
-  "author": "",
+  "author": "Sacha",
   "license": "MIT",
   "dependencies": {
     "viem": "^2.21.54",

@@ -1,47 +1,49 @@
-# 🏗️ ERC-4337 Smart Account - Sepolia Testnet
+# 🔐 ERC-4337 Smart Account - Sepolia Testnet
 
-A complete implementation of ERC-4337 Account Abstraction with advanced features including multisig, transaction batching, session keys, and social recovery.
+Une implémentation complète d'Account Abstraction (ERC-4337) avec fonctionnalités avancées incluant multisig, batching de transactions, session keys et récupération sociale.
 
-![Solidity](https://img.shields.io/badge/Solidity-0.8.24-blue)
-![Foundry](https://img.shields.io/badge/Foundry-Latest-green)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)
-![React](https://img.shields.io/badge/React-18.3-blue)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+![Solidity](https://img.shields.io/badge/Solidity-0.8.24-e6e6e6?logo=solidity)
+![Foundry](https://img.shields.io/badge/Foundry-v1.5.1-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178c6?logo=typescript)
+![React](https://img.shields.io/badge/React-18.3-61dafb?logo=react)
+![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
 
-## 📋 Table of Contents
+## 📋 Table des matières
 
-- [Features](#-features)
-- [Architecture](#-architecture)
-- [Tech Stack](#-tech-stack)
-- [Getting Started](#-getting-started)
+- [Fonctionnalités](#-fonctionnalités)
+- [Architecture](#️-architecture)
+- [Stack Technique](#️-stack-technique)
+- [Installation](#-installation)
 - [Smart Contracts](#-smart-contracts)
-- [Backend Scripts](#-backend-scripts)
+- [Scripts Backend](#-scripts-backend)
 - [Frontend](#-frontend)
-- [Deployment](#-deployment)
-- [Testing](#-testing)
-- [Troubleshooting](#-troubleshooting)
-- [Resources](#-resources)
+- [Contrats Déployés](#-contrats-déployés)
+- [Tests](#-tests)
+- [Dépannage](#-dépannage)
+- [Ressources](#-ressources)
 
 ---
 
-## ✨ Features
+## ✨ Fonctionnalités
 
 ### Smart Contract Features
-- ✅ **Multisig Support**: Configurable threshold signatures
-- ✅ **Transaction Batching**: Execute multiple operations in one UserOp
-- ✅ **Session Keys**: Temporary access with expiration and one-time use
-- ✅ **Social Recovery**: Guardian-based account recovery mechanism
-- ✅ **ERC-4337 v0.7**: Fully compatible with EntryPoint v0.7
-- ✅ **Gas Abstraction**: Paymaster sponsorship for gasless transactions
+
+✅ **Multisig Support**: Signatures à seuil configurable  
+✅ **Transaction Batching**: Exécution de multiples opérations en un UserOp  
+✅ **Session Keys**: Accès temporaire avec expiration et utilisation unique  
+✅ **Social Recovery**: Mécanisme de récupération basé sur les guardians  
+✅ **ERC-4337 v0.7**: Entièrement compatible avec EntryPoint v0.7  
+✅ **Gas Abstraction**: Sponsorisation des frais par Paymaster  
 
 ### Frontend Features
-- 🎨 Modern React UI with TypeScript
-- 🌈 RainbowKit wallet connection
-- 📱 Responsive design with Tailwind CSS
-- 🔄 Real-time transaction status
-- 💰 Gas estimation and savings calculator
+
+🎨 Interface React moderne avec TypeScript  
+🌈 Connexion wallet via RainbowKit  
+📱 Design responsive avec Tailwind CSS  
+🔄 Statut de transaction en temps réel  
+💰 Calculateur d'économies de gas  
 
 ---
 
@@ -51,16 +53,16 @@ A complete implementation of ERC-4337 Account Abstraction with advanced features
 ┌─────────────────┐
 │   EOA Wallet    │  (MetaMask, etc.)
 └────────┬────────┘
-         │ Signs UserOp
+         │ Signe UserOp
          ▼
 ┌─────────────────┐
-│ Smart Account   │  (Your ERC-4337 account)
+│ Smart Account   │  (Votre compte ERC-4337)
 │  - Multisig     │
 │  - Batching     │
 │  - Session Keys │
 │  - Recovery     │
 └────────┬────────┘
-         │ Calls
+         │ Appelle
          ▼
 ┌─────────────────┐
 │  EntryPoint     │  (v0.7)
@@ -74,86 +76,91 @@ A complete implementation of ERC-4337 Account Abstraction with advanced features
 └─────────────────┘     └─────────────────┘
 ```
 
-### ERC-4337 Flow
+### Flux ERC-4337
 
-1. **User** creates a `UserOperation` (like a transaction)
-2. **Owner** signs the UserOp with their wallet
-3. **Bundler** (Pimlico) receives and validates the UserOp
-4. **Paymaster** (optional) sponsors the gas fees
-5. **EntryPoint** executes the UserOp on-chain
-6. **Smart Account** performs the actual operations
+1. **L'utilisateur crée** une UserOperation (comme une transaction)
+2. **L'owner signe** le UserOp avec son wallet
+3. **Le Bundler** (Pimlico) reçoit et valide le UserOp
+4. **Le Paymaster** (optionnel) sponsorise les frais de gas
+5. **L'EntryPoint** exécute le UserOp on-chain
+6. **Le Smart Account** effectue les opérations réelles
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Stack Technique
 
 ### Smart Contracts
-- **Solidity** 0.8.24
-- **Foundry** - Development framework
-- **OpenZeppelin** - Secure contract libraries
-- **Account Abstraction** - ERC-4337 interfaces (v0.7)
+
+- **Solidity 0.8.24**
+- **Foundry** - Framework de développement
+- **OpenZeppelin** - Bibliothèques de contrats sécurisés
+- **Account Abstraction** - Interfaces ERC-4337 (v0.7)
 
 ### Backend
-- **TypeScript** 5.7
-- **Viem** 2.x - Ethereum library
-- **Pimlico** - Bundler service
+
+- **TypeScript 5.7**
+- **Viem 2.x** - Bibliothèque Ethereum
+- **Pimlico** - Service Bundler
 
 ### Frontend
-- **React** 18.3
-- **TypeScript** 5.7
-- **Vite** 6.0 - Build tool
-- **Tailwind CSS** 3.4 - Styling
-- **RainbowKit** - Wallet connection
-- **Wagmi** - React hooks for Ethereum
+
+- **React 18.3**
+- **TypeScript 5.7**
+- **Vite 6.0** - Outil de build
+- **Tailwind CSS 3.4** - Styling
+- **RainbowKit** - Connexion wallet
+- **Wagmi** - Hooks React pour Ethereum
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Installation
 
-### Prerequisites
+### Prérequis
 
-- Node.js 18+ ([Download](https://nodejs.org/))
-- Foundry ([Install](https://getfoundry.sh/))
-- MetaMask or compatible wallet
+- Node.js 18+ ([Télécharger](https://nodejs.org/))
+- Foundry ([Installer](https://book.getfoundry.sh/getting-started/installation))
+- MetaMask ou wallet compatible
 - Sepolia ETH ([Faucet](https://cloud.google.com/application/web3/faucet/ethereum/sepolia))
-- Pimlico API Key ([Get one](https://dashboard.pimlico.io/))
+- Clé API Pimlico ([Obtenir](https://dashboard.pimlico.io/))
 
 ### Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/alineuh/erc4337-smart-account-v07-sepolia.git
-cd erc4337-smart-account-v07-sepolia
+# Cloner le repository
+git clone https://github.com/zag2110/Account-Abstraction.git
+cd Account-Abstraction
 
-# Install Node.js dependencies
+# Installer les dépendances Node.js
 npm install
 
-# Install Foundry dependencies
+# Installer les dépendances Foundry
 cd contracts
 forge install
 cd ..
 ```
 
-### Environment Setup
+### Configuration de l'environnement
 
 ```bash
-# Copy the environment template
+# Copier le template d'environnement
 cp .env.example .env
 
-# Edit .env and fill in your values
+# Éditer .env et remplir vos valeurs
 nano .env
 ```
 
-**Required environment variables:**
+Variables d'environnement requises:
+
 ```env
 # Deployment
-PRIVATE_KEY=0xyour_private_key_here
-SEPOLIA_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/YOUR_KEY
+PRIVATE_KEY=your_private_key_here_with_0x_prefix
+SEPOLIA_RPC_URL=https://ethereum-sepolia-rpc.publicnode.com
+ETHERSCAN_API_KEY=your_etherscan_api_key
 
 # Pimlico Bundler
 PIMLICO_API_KEY=your_pimlico_api_key
 
-# Deployed Contracts (fill after deployment)
+# Deployed Contracts (à remplir après déploiement)
 FACTORY_ADDRESS=
 PAYMASTER_ADDRESS=
 NFT_ADDRESS=
@@ -164,34 +171,34 @@ SMART_ACCOUNT_ADDRESS=
 
 ## 📜 Smart Contracts
 
-### Contract Architecture
+### Architecture des Contrats
 
-| Contract | Description | Features |
-|----------|-------------|----------|
-| `SmartAccount.sol` | Main account contract | Multisig, batching, session keys, recovery |
-| `SmartAccountFactory.sol` | Account deployment | CREATE2, counterfactual addresses |
-| `DemoPaymaster.sol` | Gas sponsorship | Blind approval (demo only) |
-| `DemoNFT.sol` | Test NFT | Simple ERC-721 for testing |
+| Contract | Description | Fonctionnalités |
+|----------|-------------|-----------------|
+| `SmartAccount.sol` | Contrat de compte principal | Multisig, batching, session keys, recovery |
+| `SmartAccountFactory.sol` | Déploiement de comptes | CREATE2, adresses counterfactual |
+| `DemoPaymaster.sol` | Sponsorisation gas | Approbation aveugle (demo uniquement) |
+| `DemoNFT.sol` | NFT de test | Simple ERC-721 pour tests |
 
-### Key Functions
+### Fonctions Clés
 
 #### SmartAccount
 
 ```solidity
-// Execute single transaction
+// Exécuter une transaction unique
 function execute(address target, uint256 value, bytes calldata data)
 
-// Execute batch transactions
+// Exécuter des transactions en batch
 function executeBatch(
     address[] calldata targets,
     uint256[] calldata values,
     bytes[] calldata datas
 )
 
-// Add session key
+// Ajouter une session key
 function addSessionKey(address key, uint48 validUntil, bool oneTime)
 
-// Social recovery
+// Récupération sociale
 function proposeRecovery(address[] calldata newOwners, uint256 newThreshold)
 function approveRecovery(bytes32 recoveryHash)
 function executeRecovery(address[] calldata newOwners, uint256 newThreshold)
@@ -199,169 +206,142 @@ function executeRecovery(address[] calldata newOwners, uint256 newThreshold)
 
 ---
 
-## 💻 Backend Scripts
+## 💻 Scripts Backend
 
-### Available Scripts
+### Scripts Disponibles
 
 ```bash
-# Create a new Smart Account
+# Créer un nouveau Smart Account
 npm run create-account
 
-# Mint an NFT via UserOp
+# Minter un NFT via UserOp
 npm run mint-nft
 
-# Test batch transactions
+# Tester les transactions batch
 npm run test-batch
 
-# Test session keys
+# Tester les session keys
 npm run test-session-key
 ```
 
-### Script Details
+### Détails des Scripts
 
 #### 1. Create Account
 ```bash
 npm run create-account
 ```
-- Predicts the counterfactual address
-- Deploys the Smart Account via Factory
-- Initializes with your wallet as owner
+- Prédit l'adresse counterfactual
+- Déploie le Smart Account via Factory
+- Initialise avec votre wallet comme owner
 
 #### 2. Mint NFT
 ```bash
 npm run mint-nft
 ```
-- Creates a UserOperation to mint an NFT
-- Signs with your wallet
-- Sends to Pimlico bundler
-- Paymaster sponsors gas fees
+- Crée une UserOperation pour minter un NFT
+- Signe avec votre wallet
+- Envoie au bundler Pimlico
+- Le Paymaster sponsorise les frais de gas
+
+**Résultat**: ~160k gas par mint
 
 #### 3. Test Batch
 ```bash
 npm run test-batch
 ```
-- Mints multiple NFTs in one transaction
-- Demonstrates gas savings
-- Shows atomic execution
+- Mint 3 NFTs en une seule transaction
+- Démontre les économies de gas
+- Exécution atomique
+
+**Économies**: 45% de gas économisé (248k au lieu de 450k)
 
 #### 4. Test Session Keys
 ```bash
 npm run test-session-key
 ```
-- Generates a temporary key
-- Adds it to the Smart Account
-- Uses it to sign a UserOp
-- Demonstrates delegation
+- Génère une clé temporaire
+- L'ajoute au Smart Account
+- L'utilise pour signer un UserOp
+- Démontre la délégation de permissions
 
 ---
 
 ## 🎨 Frontend
 
-### Running the Frontend
+### Lancer le Frontend
 
 ```bash
-# Development mode
+# Mode développement
 npm run dev
 
-# Build for production
+# Build pour production
 npm run build
 
-# Preview production build
+# Prévisualiser le build
 npm run preview
 ```
 
-The frontend will be available at `http://localhost:3000`
+Le frontend sera disponible sur `http://localhost:3000`
 
-### Features
+### Fonctionnalités
 
-- **Connect Wallet**: RainbowKit integration with MetaMask, WalletConnect, etc.
-- **Create Account**: Deploy your Smart Account with predicted address
-- **Mint NFT**: Execute UserOperations via the bundler
-- **Batch Transactions**: Multiple operations in one UserOp
-- **Session Keys**: Manage temporary access keys
-
-### Configuration
-
-Update contract addresses in `frontend/src/components/` files:
-
-```typescript
-const FACTORY_ADDRESS = '0x...' as Address;
-const NFT_ADDRESS = '0x...' as Address;
-const PAYMASTER_ADDRESS = '0x...' as Address;
-```
+- **Connexion Wallet**: Intégration RainbowKit avec MetaMask, WalletConnect, etc.
+- **Créer un Compte**: Déployer votre Smart Account avec adresse prédite
+- **Mint NFT**: Exécuter des UserOperations via le bundler
+- **Transactions Batch**: Multiples opérations en un UserOp
+- **Session Keys**: Gérer les clés d'accès temporaires
 
 ---
 
-## 🏗️ Deployment
+## 🏗️ Contrats Déployés
 
-### Step 1: Build Contracts
+Tous les contrats sont déployés sur **Sepolia Testnet** et vérifiés sur Etherscan.
 
-```bash
-cd contracts
-forge build
-```
+### Adresses des Contrats
 
-### Step 2: Deploy to Sepolia
+| Contrat | Adresse | Etherscan |
+|---------|---------|-----------|
+| **EntryPoint v0.7** | `0x0000000071727De22E5E9d8BAf0edAc6f37da032` | [↗](https://sepolia.etherscan.io/address/0x0000000071727De22E5E9d8BAf0edAc6f37da032) |
+| **Implementation** | `0x50F0Af68179FE6771b5Ef31A232C17e59543a273` | [↗](https://sepolia.etherscan.io/address/0x50F0Af68179FE6771b5Ef31A232C17e59543a273) |
+| **Factory** | `0x34b271bE0ce80156DBa7562298A1276c6Fe15C58` | [↗](https://sepolia.etherscan.io/address/0x34b271bE0ce80156DBa7562298A1276c6Fe15C58) |
+| **Paymaster** | `0xf66fffBBd79Bc2014db0a44D66844b1050a8a1a3` | [↗](https://sepolia.etherscan.io/address/0xf66fffBBd79Bc2014db0a44D66844b1050a8a1a3) |
+| **NFT Contract** | `0xEC7926eBc6E3f2C0BF669111E50DcB11466BcD19` | [↗](https://sepolia.etherscan.io/address/0xEC7926eBc6E3f2C0BF669111E50DcB11466BcD19) |
+| **Smart Account** | `0xe61e60079C3d41241bd90D65a7417938B8eCA27b` | [↗](https://sepolia.etherscan.io/address/0xe61e60079C3d41241bd90D65a7417938B8eCA27b) |
 
-```bash
-# Make sure you have at least 0.05 ETH on Sepolia
-forge script script/Deploy.s.sol:Deploy \
-  --rpc-url $SEPOLIA_RPC_URL \
-  --private-key $PRIVATE_KEY \
-  --broadcast \
-  -vvvv
-```
+### Statistiques
 
-### Step 3: Fund the Paymaster
+- **Paymaster Financé**: 0.05 ETH
+- **NFTs Mintés**: 10+ (via différentes méthodes)
+- **Gas Économisé**: ~45% avec batching
+- **Session Keys Créées**: Multiples (expiration 1h)
 
-```bash
-cast send $PAYMASTER_ADDRESS \
-  "deposit()" \
-  --value 0.1ether \
-  --private-key $PRIVATE_KEY \
-  --rpc-url $SEPOLIA_RPC_URL
-```
+### Transactions Notables
 
-### Step 4: Update .env
-
-Copy the deployed addresses to your `.env` file:
-
-```env
-FACTORY_ADDRESS=0x...
-PAYMASTER_ADDRESS=0x...
-NFT_ADDRESS=0x...
-```
-
-### Deployed Addresses (Example)
-
-```
-EntryPoint:     0x0000000071727De22E5E9d8BAf0edAc6f37da032
-Factory:        0xE7dac0983B69a7c56E1D840A3A4500F7AF4993c5
-Paymaster:      0x167D0ECb831758AB496ED99befceB5F1c076021A
-NFT:            0x8FAF5b6b434941F1A36a6A15E569C478Eb677481
-```
+- **Premier Mint**: [0x86e8eab3...](https://sepolia.etherscan.io/tx/0x86e8eab36d6b2803aa096ee585f57478fd73bc9dfd42cd6062b9ea603b8638a7)
+- **Batch de 3 NFTs**: [0xef5b3b88...](https://sepolia.etherscan.io/tx/0xef5b3b8807edef25c02e6e4d0b034073dc5e08f1170d8b25b489a492b9b0d615)
+- **Session Key Mint**: [0x8306dbc8...](https://sepolia.etherscan.io/tx/0x8306dbc8288293ba5268aba5a334394c6db2af5099ede96163a748d45272b872)
 
 ---
 
-## 🧪 Testing
+## 🧪 Tests
 
-### Run Foundry Tests
+### Tests Foundry
 
 ```bash
 cd contracts
 forge test -vvv
 ```
 
-### Test Coverage
+### Couverture de Tests
 
 ```bash
 forge coverage
 ```
 
-### Integration Testing
+### Tests d'Intégration
 
 ```bash
-# Test the complete flow
+# Tester le flux complet
 npm run create-account
 npm run mint-nft
 npm run test-batch
@@ -370,84 +350,111 @@ npm run test-session-key
 
 ---
 
-## 🐛 Troubleshooting
+## 🐛 Dépannage
 
-### Common Issues
+### Problèmes Courants
 
 #### 1. "Contract function returned no data"
 
-**Problem**: Contracts not deployed or wrong address
+**Problème**: Contrats non déployés ou mauvaise adresse
 
 **Solution**:
 ```bash
-# Verify contract exists
+# Vérifier que le contrat existe
 cast code $FACTORY_ADDRESS --rpc-url $SEPOLIA_RPC_URL
 
-# If returns 0x, redeploy
+# Si retourne 0x, redéployer
 forge script script/Deploy.s.sol:Deploy --rpc-url $SEPOLIA_RPC_URL --broadcast
 ```
 
 #### 2. "UserOp simulation failed"
 
-**Problem**: Paymaster not funded or wrong nonce
+**Problème**: Paymaster non financé ou mauvais nonce
 
 **Solution**:
 ```bash
-# Check paymaster balance
+# Vérifier le solde du paymaster
 cast balance $PAYMASTER_ADDRESS --rpc-url $SEPOLIA_RPC_URL
 
-# Fund if needed
-cast send $PAYMASTER_ADDRESS "deposit()" --value 0.1ether
+# Financer si nécessaire
+cast send $PAYMASTER_ADDRESS "deposit()" --value 0.1ether --private-key $PRIVATE_KEY
 ```
 
 #### 3. "Insufficient funds for gas"
 
-**Problem**: Not enough Sepolia ETH
+**Problème**: Pas assez de Sepolia ETH
 
-**Solution**: Get more ETH from faucets:
-- https://cloud.google.com/application/web3/faucet/ethereum/sepolia
-- https://www.alchemy.com/faucets/ethereum-sepolia
+**Solution**: Obtenir plus d'ETH depuis les faucets:
+- [Google Cloud Faucet](https://cloud.google.com/application/web3/faucet/ethereum/sepolia)
+- [Alchemy Faucet](https://www.alchemy.com/faucets/ethereum-sepolia)
 
-#### 4. Foundry doesn't broadcast transactions
+#### 4. "AA24 signature error"
 
-**Problem**: Foundry simulating instead of broadcasting
+**Problème**: Signature invalide ou format incorrect
 
-**Solution**: Use `cast` directly or ensure `--broadcast` flag is used
+**Solution**: 
+- Utiliser `signMessage()` au lieu de `sign()` pour compatibilité avec `_ethSigned()`
+- Vérifier que le format UserOp est correct (packed pour hash, unpacked pour API)
 
 ---
 
-## 📚 Resources
+## 📚 Ressources
 
-### Official Documentation
-- [ERC-4337 Specification](https://eips.ethereum.org/EIPS/eip-4337)
-- [EntryPoint v0.7](https://github.com/eth-infinitism/account-abstraction/tree/releases/v0.7)
-- [Pimlico Documentation](https://docs.pimlico.io/)
+### Documentation Officielle
+
+- [Spécification ERC-4337](https://eips.ethereum.org/EIPS/eip-4337)
+- [EntryPoint v0.7](https://github.com/eth-infinitism/account-abstraction/releases/tag/v0.7.0)
+- [Documentation Pimlico](https://docs.pimlico.io/)
 - [Foundry Book](https://book.getfoundry.sh/)
 
-### Learning Resources
-- [Account Abstraction Guide](https://www.alchemy.com/overviews/account-abstraction)
-- [ERC-4337 Deep Dive](https://eip4337.substack.com/)
-- [Viem Documentation](https://viem.sh/)
+### Ressources d'Apprentissage
 
-### Community
-- [Ethereum Account Abstraction Discord](https://discord.gg/TQkHtJVq)
-- [Foundry Telegram](https://t.me/foundry_rs)
+- [Guide Account Abstraction](https://www.alchemy.com/overviews/account-abstraction)
+- [ERC-4337 Deep Dive](https://www.erc4337.io/)
+- [Documentation Viem](https://viem.sh/)
+
+### Communauté
+
+- [Discord Account Abstraction](https://discord.gg/account-abstraction)
+- [Telegram Foundry](https://t.me/foundry_rs)
 
 ---
 
-## 🤝 Contributing
+## 🤝 Contribution
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Les contributions sont les bienvenues! N'hésitez pas à soumettre une Pull Request.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. Fork le repository
+2. Créez votre branche feature (`git checkout -b feature/AmazingFeature`)
+3. Commit vos changements (`git commit -m 'Add some AmazingFeature'`)
+4. Push vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrez une Pull Request
 
+---
 
 ## 📧 Contact
 
-Aline - [@alineuh](https://github.com/alineuh)
-Project Link: [https://github.com/alineuh/erc4337-smart-account-v07-sepolia](https://github.com/alineuh/erc4337-smart-account-v07-sepolia)
-Linkedin : https://www.linkedin.com/in/aline-spano-a1493025b/
+**Sacha** - GitHub: [@zag2110](https://github.com/zag2110)
+
+**Project Link**: [https://github.com/zag2110/Account-Abstraction](https://github.com/zag2110/Account-Abstraction)
+
+---
+
+## 📄 Licence
+
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+
+---
+
+## 🙏 Remerciements
+
+- [Ethereum Foundation](https://ethereum.org/) pour ERC-4337
+- [Pimlico](https://pimlico.io/) pour le service bundler
+- [Foundry](https://getfoundry.sh/) pour les outils de développement
+- [OpenZeppelin](https://openzeppelin.com/) pour les bibliothèques sécurisées
+
+---
+
+<div align="center">
+  <strong>⭐ Si ce projet vous a aidé, n'hésitez pas à lui donner une étoile! ⭐</strong>
+</div>

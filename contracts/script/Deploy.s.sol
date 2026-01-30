@@ -106,12 +106,15 @@ contract Deploy is Script {
         console2.log("");
 
         // Sauvegarder dans un fichier JSON
+        // Commenté car nécessite --fs-permissions
+        /*
         _saveDeploymentInfo(
             address(implementation),
             address(factory),
             address(paymaster),
             address(nft)
         );
+        */
     }
 
     function _saveDeploymentInfo(

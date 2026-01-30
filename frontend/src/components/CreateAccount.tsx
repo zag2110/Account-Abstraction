@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
 import { parseEther, encodeFunctionData, type Address } from 'viem';
 
-// Remplacer par les vraies adresses déployées
-const FACTORY_ADDRESS = '0xE7dac0983B69a7c56E1D840A3A4500F7AF4993c5' as Address;
+// Adresses des contrats déployés sur Sepolia
+const FACTORY_ADDRESS = '0x34b271bE0ce80156DBa7562298A1276c6Fe15C58' as Address;
 const ENTRYPOINT_ADDRESS = '0x0000000071727De22E5E9d8BAf0edAc6f37da032' as Address;
 
 const FACTORY_ABI = [
@@ -44,6 +44,7 @@ export default function CreateAccount() {
   const [loading, setLoading] = useState(false);
   const [predictedAddress, setPredictedAddress] = useState<Address | null>(null);
   const [createdAddress, setCreatedAddress] = useState<Address | null>(null);
+  const [accountExists, setAccountExists] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const predictAddress = async () => {
@@ -67,6 +68,15 @@ export default function CreateAccount() {
       });
 
       setPredictedAddress(predicted as Address);
+      
+      // Vérifier si le compte existe déjà
+      const code = await publicClient.getBytecode({ address: predicted as Address });
+      if (code && code !== '0x') {
+        setAccountExists(true);
+        setCreatedAddress(predicted as Address);
+      } else {
+        setAccountExists(false);
+      }
     } catch (err: any) {
       console.error('Predict error:', err);
       setError(err.message || 'Failed to predict address');
@@ -94,6 +104,7 @@ export default function CreateAccount() {
           [],
           0n,
         ],
+        gas: 500000n, // Limite de gas explicite pour éviter l'erreur
       });
 
       // Attendre la confirmation
@@ -138,14 +149,31 @@ export default function CreateAccount() {
 
           {predictedAddress && (
             <div className="mt-4 p-3 bg-green-900/20 border border-green-700 rounded-lg">
-              <p className="text-xs text-green-400 mb-1">Predicted Address:</p>
+              <p className="text-xs text-green-400 mb-1">
+                {accountExists ? '✅ Your Existing Smart Account:' : 'Predicted Address:'}
+              </p>
               <p className="text-sm text-white font-mono break-all">{predictedAddress}</p>
+              {accountExists && (
+                <div className="mt-2">
+                  <p className="text-xs text-yellow-400">
+                    ℹ️ This account already exists! You can use it directly.
+                  </p>
+                  <a 
+                    href={`https://sepolia.etherscan.io/address/${predictedAddress}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-400 hover:text-blue-300 underline"
+                  >
+                    View on Etherscan →
+                  </a>
+                </div>
+              )}
             </div>
           )}
         </div>
 
         {/* Create Account */}
-        {predictedAddress && (
+        {predictedAddress && !accountExists && (
           <div className="bg-slate-900 rounded-lg p-4">
             <h3 className="text-lg font-semibold text-white mb-2">Step 2: Deploy Account</h3>
             <p className="text-sm text-slate-400 mb-4">
@@ -154,15 +182,50 @@ export default function CreateAccount() {
             <button
               onClick={createAccount}
               disabled={loading || !walletClient}
-              className="btn-secondary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating...' : 'Create Account'}
             </button>
           </div>
         )}
 
+        {/* Account Already Exists */}
+        {predictedAddress && accountExists && (
+          <div className="bg-slate-900 rounded-lg p-4">
+            <h3 className="text-lg font-semibold text-green-400 mb-2">✅ Account Ready!</h3>
+            <p className="text-sm text-slate-300 mb-4">
+              Your Smart Account is already deployed and ready to use.
+            </p>
+            <div className="space-y-2">
+              <div className="text-sm text-slate-400">
+                <strong>Address:</strong>
+                <p className="font-mono text-white break-all mt-1">{predictedAddress}</p>
+              </div>
+              <div className="flex gap-2 mt-4">
+                <a
+                  href={`https://sepolia.etherscan.io/address/${predictedAddress}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-secondary flex-1 text-center"
+                >
+                  View on Etherscan
+                </a>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(predictedAddress);
+                    alert('Address copied to clipboard!');
+                  }}
+                  className="btn-primary flex-1"
+                >
+                  Copy Address
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Created Address */}
-        {createdAddress && (
+        {createdAddress && !accountExists && (
           <div className="bg-green-900/20 border border-green-700 rounded-lg p-4">
             <h3 className="text-lg font-semibold text-green-400 mb-2">✅ Account Created!</h3>
             <p className="text-sm text-slate-300 mb-2">Your Smart Account:</p>

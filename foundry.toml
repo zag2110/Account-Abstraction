@@ -17,7 +17,7 @@ evm_version = "cancun"
 # Remappings
 remappings = [
     "@openzeppelin/=contracts/lib/openzeppelin-contracts/",
-    "account-abstraction/=contracts/lib/account-abstraction/",
+    "account-abstraction/=contracts/lib/account-abstraction/contracts/",
     "forge-std/=contracts/lib/forge-std/src/"
 ]
 

@@ -78,109 +78,33 @@ async function main() {
   const validUntil = Math.floor(Date.now() / 1000) + 3600; // Valide 1 heure
   const oneTime = false; // Peut être utilisée plusieurs fois
 
-  // Encoder l'appel à addSessionKey
-  const addSessionKeyCallData = encodeFunctionData({
+  // L'owner EOA peut appeler directement addSessionKey (car isOwner[owner] = true)
+  log('🔄 Adding session key via owner wallet...', 'Sending direct transaction...');
+
+  const wallet = createWallet(ownerPrivateKey);
+  
+  const txHash = await wallet.writeContract({
+    address: smartAccountAddress,
     abi: SMART_ACCOUNT_ABI,
     functionName: 'addSessionKey',
     args: [sessionKey.address, validUntil, oneTime],
+    chain: wallet.chain,
   });
 
-  // Créer un UserOp pour ajouter la session key (signé par l'owner)
-  const wallet = createWallet(ownerPrivateKey);
-  
-  const nonce1 = await publicClient.readContract({
-    address: smartAccountAddress,
-    abi: SMART_ACCOUNT_ABI,
-    functionName: 'nonce',
-  });
+  log('⏳ Waiting for transaction...', `TxHash: ${txHash}`);
 
-  // On va faire ça de manière simple : transaction directe via le owner
-  // (pour éviter de compliquer avec un autre UserOp)
-  
-  log('🔄 Adding session key via owner...', 'Sending transaction...');
-  
-  // Encoder execute(smartAccount, 0, addSessionKeyCallData)
-  const executeCallData = encodeFunctionData({
-    abi: SMART_ACCOUNT_ABI,
-    functionName: 'execute',
-    args: [smartAccountAddress, 0n, addSessionKeyCallData],
-  });
+  const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
 
-  // Créer un UserOp signé par l'owner
-  const userOp1 = {
-    sender: smartAccountAddress,
-    nonce: nonce1,
-    initCode: '0x' as Hash,
-    callData: executeCallData as Hash,
-    accountGasLimits: pad(toHex(150000n), { size: 32 }) as Hash,
-    preVerificationGas: 50000n,
-    gasFees: concat([
-      pad(toHex(parseEther('0.000000002')), { size: 16 }),
-      pad(toHex(parseEther('0.00000002')), { size: 16 }),
-    ]) as Hash,
-    paymasterAndData: concat([PAYMASTER_ADDRESS, pad('0x', { size: 0 })]) as Hash,
-    signature: '0x' as Hash,
-  };
-
-  // Signer avec l'owner
-  const chainId = await publicClient.getChainId();
-  
-  const userOpHash1 = keccak256(
-    encodeAbiParameters(
-      [
-        { type: 'address' }, { type: 'uint256' }, { type: 'bytes32' }, { type: 'bytes32' },
-        { type: 'bytes32' }, { type: 'uint256' }, { type: 'bytes32' }, { type: 'bytes32' },
-      ],
-      [
-        userOp1.sender, userOp1.nonce, keccak256(userOp1.initCode), keccak256(userOp1.callData),
-        userOp1.accountGasLimits, userOp1.preVerificationGas, userOp1.gasFees,
-        keccak256(userOp1.paymasterAndData),
-      ]
-    )
-  );
-
-  const finalHash1 = keccak256(
-    encodeAbiParameters(
-      [{ type: 'bytes32' }, { type: 'address' }, { type: 'uint256' }],
-      [userOpHash1, ENTRYPOINT_ADDRESS, BigInt(chainId)]
-    )
-  );
-
-  const signature1 = await owner.signMessage({ message: { raw: finalHash1 } });
-  userOp1.signature = encodeAbiParameters(
-    [{ type: 'uint8' }, { type: 'bytes' }],
-    [0, encodeAbiParameters([{ type: 'address[]' }, { type: 'bytes[]' }], [[owner.address], [signature1]])]
-  ) as Hash;
-
-  // Envoyer au bundler
-  const receipt1 = await bundlerClient.request({
-    method: 'eth_sendUserOperation' as any,
-    params: [userOp1, ENTRYPOINT_ADDRESS],
-  });
-
-  log('⏳ Waiting for session key to be added...', 'Please wait...');
-
-  // Attendre l'exécution
-  let added = null;
-  for (let i = 0; i < 30; i++) {
-    try {
-      added = await bundlerClient.request({
-        method: 'eth_getUserOperationReceipt' as any,
-        params: [receipt1],
-      });
-      if (added) break;
-    } catch (e) {}
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
-
-  if (!added) {
-    throw new Error('❌ Failed to add session key after 30 seconds.');
+  if (receipt.status !== 'success') {
+    throw new Error('❌ Session key addition failed on-chain.');
   }
 
   log('✅ Session Key Added!', {
     sessionKey: sessionKey.address,
     validUntil: new Date(validUntil * 1000).toISOString(),
     oneTime: oneTime,
+    txHash: receipt.transactionHash,
+    blockNumber: receipt.blockNumber,
   });
 
   // ==========================================
@@ -189,13 +113,19 @@ async function main() {
 
   log('🎨 Minting NFT with Session Key', 'Preparing UserOp...');
 
-  // Attendre un peu pour être sûr que le nonce a été mis à jour
-  await new Promise((resolve) => setTimeout(resolve, 2000));
+  // Attendre plusieurs blocs pour être sûr que le state change est propagé
+  log('⏳ Waiting for state propagation...', 'Waiting 15 seconds...');
+  await new Promise((resolve) => setTimeout(resolve, 15000));
 
   const nonce2 = await publicClient.readContract({
     address: smartAccountAddress,
     abi: SMART_ACCOUNT_ABI,
     functionName: 'nonce',
+  });
+
+  log('🔢 Current Nonce', {
+    nonce: nonce2.toString(),
+    note: 'Will use this nonce for session key UserOp',
   });
 
   // Préparer le mint
@@ -212,22 +142,46 @@ async function main() {
   });
 
   // Créer le UserOp
+  const verificationGasLimit2 = 150000n;
+  const callGasLimit2 = 300000n;
+  const preVerificationGas2 = 60000n;
+  const maxFeePerGas2 = parseEther('0.00000002');
+  const maxPriorityFeePerGas2 = parseEther('0.000000002');
+
+  const accountGasLimits2 = concat([
+    pad(toHex(verificationGasLimit2), { size: 16 }),
+    pad(toHex(callGasLimit2), { size: 16 }),
+  ]) as Hash;
+
+  const gasFees2 = concat([
+    pad(toHex(maxPriorityFeePerGas2), { size: 16 }),
+    pad(toHex(maxFeePerGas2), { size: 16 }),
+  ]) as Hash;
+
+  const paymasterVerificationGasLimit2 = 50000n;
+  const paymasterPostOpGasLimit2 = 50000n;
+  const paymasterAndData2 = concat([
+    PAYMASTER_ADDRESS,
+    pad(toHex(paymasterVerificationGasLimit2), { size: 16 }),
+    pad(toHex(paymasterPostOpGasLimit2), { size: 16 }),
+    '0x' as Hash, // paymasterData
+  ]) as Hash;
+
   const userOp2 = {
     sender: smartAccountAddress,
-    nonce: nonce2,
+    nonce: toHex(nonce2),
     initCode: '0x' as Hash,
     callData: executeCallData2 as Hash,
-    accountGasLimits: pad(toHex(150000n), { size: 32 }) as Hash,
-    preVerificationGas: 50000n,
-    gasFees: concat([
-      pad(toHex(parseEther('0.000000002')), { size: 16 }),
-      pad(toHex(parseEther('0.00000002')), { size: 16 }),
-    ]) as Hash,
-    paymasterAndData: concat([PAYMASTER_ADDRESS, pad('0x', { size: 0 })]) as Hash,
+    accountGasLimits: accountGasLimits2,
+    preVerificationGas: toHex(preVerificationGas2),
+    gasFees: gasFees2,
+    paymasterAndData: paymasterAndData2,
     signature: '0x' as Hash,
   };
 
   // Calculer le hash
+  const chainId = await publicClient.getChainId();
+  
   const userOpHash2 = keccak256(
     encodeAbiParameters(
       [
@@ -235,9 +189,9 @@ async function main() {
         { type: 'bytes32' }, { type: 'uint256' }, { type: 'bytes32' }, { type: 'bytes32' },
       ],
       [
-        userOp2.sender, userOp2.nonce, keccak256(userOp2.initCode), keccak256(userOp2.callData),
-        userOp2.accountGasLimits, userOp2.preVerificationGas, userOp2.gasFees,
-        keccak256(userOp2.paymasterAndData),
+        userOp2.sender, nonce2, keccak256(userOp2.initCode), keccak256(userOp2.callData),
+        accountGasLimits2, preVerificationGas2, gasFees2,
+        keccak256(paymasterAndData2),
       ]
     )
   );
@@ -268,12 +222,29 @@ async function main() {
     mode: 'session_key',
   });
 
+  // Convertir en format unpacked pour Pimlico (sans initCode car compte existe)
+  const userOp2ForBundle = {
+    sender: userOp2.sender,
+    nonce: userOp2.nonce,
+    callData: userOp2.callData,
+    callGasLimit: toHex(callGasLimit2),
+    verificationGasLimit: toHex(verificationGasLimit2),
+    preVerificationGas: userOp2.preVerificationGas,
+    maxFeePerGas: toHex(maxFeePerGas2),
+    maxPriorityFeePerGas: toHex(maxPriorityFeePerGas2),
+    paymaster: PAYMASTER_ADDRESS,
+    paymasterData: '0x' as Hash,
+    paymasterVerificationGasLimit: toHex(paymasterVerificationGasLimit2),
+    paymasterPostOpGasLimit: toHex(paymasterPostOpGasLimit2),
+    signature: userOp2.signature,
+  };
+
   // Envoyer au bundler
   log('📡 Sending UserOp to Bundler...', 'Please wait...');
 
   const receipt2 = await bundlerClient.request({
     method: 'eth_sendUserOperation' as any,
-    params: [userOp2, ENTRYPOINT_ADDRESS],
+    params: [userOp2ForBundle, ENTRYPOINT_ADDRESS],
   });
 
   log('⏳ Waiting for execution...', 'This may take 5-15 seconds...');
